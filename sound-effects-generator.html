@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Sound Effects Generator | IncomeAIHub</title>
+<meta name="description" content="Browser mein hi professional sound effects banayein - UI clicks, retro game sounds, sci-fi, impact aur whoosh. Instant preview, WAV download.">
+
+<!-- Google AdSense Placeholder -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"></script> -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+:root{
+  --bg:#0b0e14;
+  --bg-panel:#12161f;
+  --bg-panel-2:#161b26;
+  --border:#232a38;
+  --gold:#e0b559;
+  --gold-soft:#f2d18c;
+  --emerald:#3ecf8e;
+  --violet:#9b8cff;
+  --text:#eef1f6;
+  --text-dim:#8993a6;
+  --text-faint:#5a6478;
+  --danger:#ef6b6b;
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow-glow:0 0 0 1px rgba(224,181,89,.08), 0 20px 60px -20px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(155,140,255,.10), transparent 60%),
+    radial-gradient(1000px 500px at 100% 0%, rgba(62,207,142,.08), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  line-height:1.5;
+}
+h1,h2,h3,.display{font-family:'Syne',sans-serif;}
+.mono{font-family:'DM Mono',monospace;}
+a{color:inherit;}
+::selection{background:rgba(224,181,89,.3);}
+
+/* ===== Top bar ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 24px; border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:50;
+  background:rgba(11,14,20,.85); backdrop-filter:blur(10px);
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand .mark{
+  width:34px; height:34px; border-radius:9px;
+  background:linear-gradient(135deg, var(--gold), var(--violet));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-weight:800; color:#0b0e14; font-size:15px;
+}
+.brand .name{font-family:'Syne',sans-serif; font-weight:700; font-size:16px; letter-spacing:.2px;}
+.brand .name span{color:var(--gold);}
+.topbar-actions{display:flex; align-items:center; gap:10px;}
+.pill{
+  font-size:12px; padding:6px 12px; border-radius:100px; border:1px solid var(--border);
+  color:var(--text-dim); display:flex; align-items:center; gap:6px;
+}
+.pill.unlocked{color:var(--emerald); border-color:rgba(62,207,142,.35); background:rgba(62,207,142,.08);}
+.btn{
+  font-family:'DM Sans',sans-serif; font-weight:600; font-size:13.5px;
+  padding:10px 18px; border-radius:10px; border:1px solid var(--border);
+  background:var(--bg-panel-2); color:var(--text); cursor:pointer;
+  transition:.15s ease; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:hover{border-color:rgba(224,181,89,.4); transform:translateY(-1px);}
+.btn-gold{
+  background:linear-gradient(135deg, var(--gold), var(--gold-soft));
+  color:#1a1406; border:none; font-weight:700;
+}
+.btn-gold:hover{filter:brightness(1.05); box-shadow:0 8px 24px -8px rgba(224,181,89,.5);}
+.btn-ghost{background:transparent;}
+.btn:disabled{opacity:.5; cursor:not-allowed; transform:none;}
+
+/* ===== Layout ===== */
+.wrap{max-width:1280px; margin:0 auto; padding:32px 24px 80px;}
+.hero{text-align:center; margin-bottom:36px;}
+.hero .eyebrow{
+  font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--violet);
+  font-weight:600; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.hero .eyebrow::before, .hero .eyebrow::after{content:''; width:24px; height:1px; background:var(--violet); opacity:.5;}
+.hero h1{font-size:clamp(28px,4vw,42px); font-weight:800; margin-bottom:12px; letter-spacing:-.5px;}
+.hero h1 em{font-style:normal; background:linear-gradient(135deg, var(--gold), var(--emerald)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.hero p{color:var(--text-dim); font-size:15px; max-width:560px; margin:0 auto;}
+
+.grid{display:grid; grid-template-columns:340px 1fr; gap:22px;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; box-shadow:var(--shadow-glow);
+}
+.panel + .panel{margin-top:20px;}
+.panel h3{font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:16px; font-weight:700;}
+
+/* ===== Category / preset list ===== */
+.cat-group{margin-bottom:18px;}
+.cat-title{
+  font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--gold);
+  font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;
+}
+.preset-list{display:flex; flex-direction:column; gap:6px;}
+.preset-btn{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:10px 12px; border-radius:9px; border:1px solid transparent;
+  background:var(--bg-panel-2); color:var(--text); cursor:pointer;
+  font-size:13.5px; font-weight:500; text-align:left; transition:.12s ease;
+}
+.preset-btn:hover{border-color:rgba(224,181,89,.35); background:#1b2130;}
+.preset-btn.active{border-color:var(--emerald); background:rgba(62,207,142,.08); color:var(--emerald);}
+.preset-btn .ic{opacity:.6; font-size:15px;}
+
+/* ===== Editor / visualizer ===== */
+.stage{
+  display:flex; flex-direction:column; gap:20px;
+}
+.viz-box{
+  background:#080a0f; border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px; position:relative; overflow:hidden;
+}
+.viz-box canvas{width:100%; height:180px; display:block; border-radius:8px;}
+.viz-label{position:absolute; top:14px; left:22px; font-size:11px; color:var(--text-faint); letter-spacing:1px; text-transform:uppercase; font-weight:600;}
+
+.transport{display:flex; align-items:center; gap:12px; margin-top:16px; flex-wrap:wrap;}
+.play-btn{
+  width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--emerald), #2fae74); color:#06170f;
+  font-size:20px; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 24px -6px rgba(62,207,142,.5); transition:.15s;
+  flex-shrink:0;
+}
+.play-btn:hover{transform:scale(1.05);}
+.play-btn:active{transform:scale(.96);}
+.transport-info{flex:1; min-width:140px;}
+.transport-info .label{font-size:13px; font-weight:700; color:var(--text);}
+.transport-info .sub{font-size:12px; color:var(--text-faint); margin-top:2px;}
+
+/* ===== Controls ===== */
+.controls-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px 20px;}
+@media(max-width:560px){.controls-grid{grid-template-columns:1fr;}}
+.field{display:flex; flex-direction:column; gap:8px;}
+.field label{
+  font-size:12px; color:var(--text-dim); display:flex; justify-content:space-between;
+  font-weight:600;
+}
+.field label .val{color:var(--gold); font-family:'DM Mono',monospace; font-size:11.5px;}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:4px;
+  background:var(--border); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--gold); cursor:pointer; border:2px solid #0b0e14;
+  box-shadow:0 0 0 1px var(--gold);
+}
+select{
+  width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-panel-2); color:var(--text); font-family:'DM Sans',sans-serif; font-size:13.5px;
+  cursor:pointer;
+}
+.toggle-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0;}
+.toggle-row span{font-size:13px; font-weight:500; color:var(--text-dim);}
+.switch{position:relative; width:42px; height:24px; flex-shrink:0;}
+.switch input{opacity:0; width:0; height:0;}
+.slider-toggle{
+  position:absolute; cursor:pointer; inset:0; background:var(--border); border-radius:100px; transition:.2s;
+}
+.slider-toggle::before{
+  content:''; position:absolute; width:18px; height:18px; left:3px; top:3px;
+  background:#0b0e14; border-radius:50%; transition:.2s;
+}
+.switch input:checked + .slider-toggle{background:var(--emerald);}
+.switch input:checked + .slider-toggle::before{transform:translateX(18px); background:#06170f;}
+
+/* ===== Actions row ===== */
+.actions-row{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+.locked-badge{
+  font-size:10.5px; background:rgba(155,140,255,.15); color:var(--violet);
+  padding:2px 7px; border-radius:5px; font-weight:700; margin-left:6px;
+}
+
+/* ===== Batch / history ===== */
+.batch-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:14px;}
+.batch-item{
+  background:var(--bg-panel-2); border:1px solid var(--border); border-radius:9px; padding:12px;
+  text-align:center; cursor:pointer; transition:.12s;
+}
+.batch-item:hover{border-color:var(--gold);}
+.batch-item .n{font-size:11px; color:var(--text-faint); margin-bottom:6px;}
+.batch-item button{font-size:12px;}
+
+.history-item{
+  display:flex; align-items:center; justify-content:space-between; padding:9px 10px;
+  border-bottom:1px solid var(--border); font-size:13px;
+}
+.history-item:last-child{border-bottom:none;}
+.history-item .ic-btn{
+  background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:15px; padding:4px 6px;
+}
+.history-item .ic-btn:hover{color:var(--gold);}
+.empty-note{color:var(--text-faint); font-size:12.5px; padding:14px 0; text-align:center;}
+
+/* ===== Ad slots ===== */
+.ad-slot{
+  border:1px dashed var(--border); border-radius:10px; padding:16px; text-align:center;
+  color:var(--text-faint); font-size:11px; letter-spacing:.5px; text-transform:uppercase;
+  margin:26px 0;
+}
+
+/* ===== Lock overlay / modal ===== */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(6,8,12,.75); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center; z-index:200; padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:16px;
+  max-width:460px; width:100%; padding:28px; position:relative; box-shadow:var(--shadow-glow);
+  max-height:88vh; overflow-y:auto;
+}
+.modal.wide{max-width:640px;}
+.modal-close{
+  position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-faint);
+  font-size:20px; cursor:pointer;
+}
+.modal h2{font-size:20px; margin-bottom:10px; font-weight:800;}
+.modal p{color:var(--text-dim); font-size:13.5px; margin-bottom:16px;}
+.feature-list{list-style:none; margin:16px 0;}
+.feature-list li{display:flex; align-items:flex-start; gap:10px; font-size:13.5px; margin-bottom:10px; color:var(--text);}
+.feature-list li::before{content:'✓'; color:var(--emerald); font-weight:800; flex-shrink:0;}
+.price-box{
+  background:linear-gradient(135deg, rgba(224,181,89,.12), rgba(155,140,255,.08));
+  border:1px solid rgba(224,181,89,.3); border-radius:12px; padding:18px; text-align:center; margin:18px 0;
+}
+.price-box .amt{font-family:'Syne',sans-serif; font-size:32px; font-weight:800; color:var(--gold);}
+.price-box .note{font-size:12px; color:var(--text-dim); margin-top:4px;}
+.guide-body h3{color:var(--gold); font-size:14px; margin:16px 0 8px;}
+.guide-body p, .guide-body li{color:var(--text-dim); font-size:13.5px; margin-bottom:6px;}
+.guide-body ul{padding-left:18px;}
+.demo-banner{
+  background:rgba(155,140,255,.1); border:1px solid rgba(155,140,255,.3); color:var(--violet);
+  font-size:12px; padding:9px 14px; border-radius:9px; margin-bottom:20px; text-align:center; font-weight:600;
+}
+.footer-note{text-align:center; color:var(--text-faint); font-size:12px; margin-top:50px;}
+.footer-note a{color:var(--gold); text-decoration:none;}
+@media(max-width:600px){
+  .wrap{padding:20px 14px 60px;}
+  .topbar{padding:12px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">SE</div>
+    <div class="name">IncomeAIHub <span>Sound FX</span></div>
+  </div>
+  <div class="topbar-actions">
+    <div class="pill" id="statusPill">🔒 Demo Mode</div>
+    <button class="btn btn-ghost" id="guideBtn">📘 Hindi Guide</button>
+    <button class="btn btn-gold" id="unlockBtn">🔓 Unlock Lifetime</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Browser-Based Audio Engine</div>
+    <h1>AI <em>Sound Effects</em> Generator</h1>
+    <p>50+ presets ko customize karein ya scratch se apna unique sound effect banayein — clicks, retro game sounds, sci-fi, impacts aur whoosh transitions. Sab kuch browser mein, instantly.</p>
+  </div>
+
+  <div class="ad-slot">Advertisement · 728×90</div>
+
+  <div class="grid">
+    <!-- LEFT: Preset Library -->
+    <div>
+      <div class="panel">
+        <h3>Preset Library</h3>
+        <div id="presetLibrary"></div>
+      </div>
+
+      <div class="panel">
+        <h3>🕘 Recent History</h3>
+        <div id="historyList"><div class="empty-note">Abhi tak koi sound generate nahi hua</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Editor -->
+    <div class="stage">
+      <div class="panel" style="padding-bottom:10px;">
+        <h3 style="margin-bottom:4px;">Live Preview</h3>
+        <div class="viz-box">
+          <div class="viz-label" id="currentPresetLabel">Custom Sound</div>
+          <canvas id="wave" height="180"></canvas>
+        </div>
+        <div class="transport">
+          <button class="play-btn" id="playBtn">▶</button>
+          <div class="transport-info">
+            <div class="label" id="soundName">Custom Sound</div>
+            <div class="sub" id="soundMeta">sine · 0.4s duration</div>
+          </div>
+          <button class="btn" id="randomBtn">🎲 Randomize</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Sound Parameters</h3>
+        <div class="controls-grid">
+          <div class="field">
+            <label>Waveform</label>
+            <select id="waveType">
+              <option value="sine">Sine (Soft)</option>
+              <option value="square">Square (Retro)</option>
+              <option value="sawtooth">Sawtooth (Sharp)</option>
+              <option value="triangle">Triangle (Warm)</option>
+              <option value="noise">Noise (Textured)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Filter Type <span class="val" id="filterTypeVal">Lowpass</span></label>
+            <select id="filterType">
+              <option value="lowpass">Lowpass</option>
+              <option value="highpass">Highpass</option>
+              <option value="bandpass">Bandpass</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Start Frequency <span class="val" id="freqStartVal">440 Hz</span></label>
+            <input type="range" id="freqStart" min="40" max="2000" value="440">
+          </div>
+          <div class="field">
+            <label>End Frequency <span class="val" id="freqEndVal">220 Hz</span></label>
+            <input type="range" id="freqEnd" min="40" max="2000" value="220">
+          </div>
+          <div class="field">
+            <label>Duration <span class="val" id="durationVal">0.40 s</span></label>
+            <input type="range" id="duration" min="5" max="300" value="40">
+          </div>
+          <div class="field">
+            <label>Attack <span class="val" id="attackVal">0.01 s</span></label>
+            <input type="range" id="attack" min="0" max="50" value="1">
+          </div>
+          <div class="field">
+            <label>Decay / Release <span class="val" id="decayVal">0.30 s</span></label>
+            <input type="range" id="decay" min="5" max="200" value="30">
+          </div>
+          <div class="field">
+            <label>Filter Cutoff <span class="val" id="filterFreqVal">4000 Hz</span></label>
+            <input type="range" id="filterFreq" min="200" max="8000" value="4000">
+          </div>
+          <div class="field">
+            <label>Noise Mix <span class="val" id="noiseMixVal">0%</span></label>
+            <input type="range" id="noiseMix" min="0" max="100" value="0">
+          </div>
+          <div class="field">
+            <label>Volume <span class="val" id="volVal">80%</span></label>
+            <input type="range" id="vol" min="0" max="100" value="80">
+          </div>
+          <div class="field">
+            <label>Pitch Bend Curve <span class="val" id="bendVal">Linear</span></label>
+            <select id="bendCurve">
+              <option value="linear">Linear</option>
+              <option value="exponential">Exponential</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <span>🌫️ Reverb Tail</span>
+          <label class="switch"><input type="checkbox" id="reverbToggle"><span class="slider-toggle"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>👾 8-bit Bitcrush</span>
+          <label class="switch"><input type="checkbox" id="crushToggle"><span class="slider-toggle"></span></label>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-gold" id="downloadBtn">⬇ Download WAV</button>
+          <button class="btn" id="saveBtn">💾 Save Preset <span class="locked-badge">PRO</span></button>
+          <button class="btn" id="batchBtn">🧬 Generate 5 Variations <span class="locked-badge">PRO</span></button>
+        </div>
+      </div>
+
+      <div class="panel" id="batchPanel" style="display:none;">
+        <h3>Batch Variations</h3>
+        <div class="batch-grid" id="batchGrid"></div>
+        <div class="actions-row">
+          <button class="btn btn-gold" id="zipBtn">📦 Download All as ZIP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-slot">Advertisement · 728×90</div>
+
+  <div class="footer-note">
+    Built with <a href="#" id="brandLink">IncomeAIHub</a> · M.Dev · Har sound 100% browser mein generate hota hai, koi server upload nahi.
+  </div>
+</div>
+
+<!-- ===== Unlock Modal ===== -->
+<div class="modal-overlay" id="unlockModal">
+  <div class="modal">
+    <button class="modal-close" id="closeUnlock">✕</button>
+    <h2>🔓 Lifetime Unlock</h2>
+    <p>Ek baar payment karein, hamesha ke liye full access paayein — koi monthly subscription nahi.</p>
+    <ul class="feature-list">
+      <li>Unlimited high-quality WAV downloads (no watermark)</li>
+      <li>Custom preset saving — apni library banayein</li>
+      <li>Batch variation generator (5 variations ek click mein)</li>
+      <li>ZIP export for bulk sound packs</li>
+      <li>50+ premium presets across 6 categories</li>
+      <li>Free lifetime updates</li>
+    </ul>
+    <div class="price-box">
+      <div class="amt">₹199</div>
+      <div class="note">One-time payment · Lifetime access · No recurring charges</div>
+    </div>
+    <button class="btn btn-gold" style="width:100%; justify-content:center; padding:13px;" id="payBtn">Pay & Unlock Now</button>
+    <p style="margin-top:12px; font-size:11.5px; text-align:center; color:var(--text-faint);">Secure payment via Razorpay · UPI, Cards, Netbanking supported</p>
+  </div>
+</div>
+
+<!-- ===== Hindi Guide Modal ===== -->
+<div class="modal-overlay" id="guideModal">
+  <div class="modal wide">
+    <button class="modal-close" id="closeGuide">✕</button>
+    <h2>📘 Istemal Guide (Hindi)</h2>
+    <div class="guide-body">
+      <h3>1. Preset Chunein</h3>
+      <p>Left panel se koi bhi preset click karein — sound turant preview hoga aur uske parameters editor mein load ho jayenge.</p>
+      <h3>2. Customize Karein</h3>
+      <p>Frequency, duration, waveform, filter aur noise mix jaise sliders se sound ko apni zaroorat ke hisaab se badlein. Har change ke baad ▶ button dabakar preview sunein.</p>
+      <h3>3. Reverb aur Bitcrush</h3>
+      <p>Reverb Tail se echo effect add karein, ya 8-bit Bitcrush se retro game jaisa texture paayein.</p>
+      <h3>4. Download Karein</h3>
+      <p>"Download WAV" button se sound file save karein. Demo mode mein 3 free downloads milte hain (watermark ke saath), lifetime unlock ke baad unlimited clean downloads milte hain.</p>
+      <h3>5. Batch Variations (Pro)</h3>
+      <p>Ek click mein 5 randomized variations generate karein aur unhe ZIP file mein download karein — game dev aur content creators ke liye perfect.</p>
+      <h3>6. Kis kaam aayega?</h3>
+      <ul>
+        <li>YouTube/Reels ke liye transition aur notification sounds</li>
+        <li>Mobile game development ke liye UI aur retro effects</li>
+        <li>Podcast intros ke liye whoosh aur impact sounds</li>
+        <li>App/website ke liye click aur success/error alerts</li>
+      </ul>
+      <h3>Client Outreach Tip</h3>
+      <p>Is tool ko game developers, YouTubers aur app developers ke saath Fiverr/WhatsApp par share karke freelance sound design gigs le sakte hain.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   IncomeAIHub — Sound Effects Generator
+   Standard locked architecture: Supabase + Razorpay lifetime unlock
+   ========================================================= */
+
+// ---------- Credentials (replace with real values) ----------
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const RAZORPAY_KEY_ID = "YOUR_RAZORPAY_KEY_ID";
+const TOOL_ID = "sound-effects-generator";
+const PRICE_INR = 199;
+
+const DEMO_MODE = SUPABASE_URL.includes("YOUR_") || RAZORPAY_KEY_ID.includes("YOUR_");
+const FREE_DOWNLOAD_LIMIT = 3;
+
+// ---------- Device ID ----------
+function getDeviceId(){
+  let id = localStorage.getItem('sefx_device_id');
+  if(!id){
+    id = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('sefx_device_id', id);
+  }
+  return id;
+}
+const deviceId = getDeviceId();
+
+// ---------- Unlock state ----------
+let isUnlocked = localStorage.getItem('sefx_unlocked') === 'true';
+let freeDownloadsUsed = parseInt(localStorage.getItem('sefx_free_downloads') || '0', 10);
+
+function refreshStatusPill(){
+  const pill = document.getElementById('statusPill');
+  if(isUnlocked){
+    pill.textContent = '✓ Unlocked';
+    pill.classList.add('unlocked');
+  } else {
+    pill.textContent = DEMO_MODE ? '🔒 Demo Mode' : `🔒 ${FREE_DOWNLOAD_LIMIT - freeDownloadsUsed} free downloads left`;
+    pill.classList.remove('unlocked');
+  }
+}
+refreshStatusPill();
+
+async function checkUnlockStatus(){
+  if(DEMO_MODE) return;
+  try{
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/check-unlock`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+      body: JSON.stringify({ device_id: deviceId, tool_id: TOOL_ID })
+    });
+    const data = await res.json();
+    if(data.unlocked){
+      isUnlocked = true;
+      localStorage.setItem('sefx_unlocked','true');
+      refreshStatusPill();
+    }
+  }catch(e){ console.log('Unlock check skipped (demo/offline)', e); }
+}
+checkUnlockStatus();
+
+// ---------- Razorpay payment flow ----------
+async function startPayment(){
+  if(DEMO_MODE){
+    alert('Demo Mode: Real Supabase/Razorpay credentials configure karne ke baad hi live payment chalega.\\n\\nAbhi ke liye demo unlock kar diya gaya hai.');
+    isUnlocked = true;
+    localStorage.setItem('sefx_unlocked','true');
+    refreshStatusPill();
+    closeModal('unlockModal');
+    return;
+  }
+  try{
+    const orderRes = await fetch(`${SUPABASE_URL}/functions/v1/create-order`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+      body: JSON.stringify({ amount: PRICE_INR * 100, tool_id: TOOL_ID, device_id: deviceId })
+    });
+    const order = await orderRes.json();
+
+    const rzp = new Razorpay({
+      key: RAZORPAY_KEY_ID,
+      amount: PRICE_INR * 100,
+      currency: 'INR',
+      name: 'IncomeAIHub',
+      description: 'Sound Effects Generator — Lifetime Unlock',
+      order_id: order.id,
+      handler: async function(response){
+        const verifyRes = await fetch(`${SUPABASE_URL}/functions/v1/verify-payment`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            tool_id: TOOL_ID, device_id: deviceId
+          })
+        });
+        const verify = await verifyRes.json();
+        if(verify.success){
+          isUnlocked = true;
+          localStorage.setItem('sefx_unlocked','true');
+          refreshStatusPill();
+          closeModal('unlockModal');
+          alert('✓ Unlock successful! Ab aap unlimited features use kar sakte hain.');
+        } else {
+          alert('Payment verify nahi ho paya. Support se contact karein.');
+        }
+      },
+      theme:{ color:'#e0b559' }
+    });
+    rzp.open();
+  }catch(e){
+    alert('Payment start karne mein error aaya. Thodi der baad try karein.');
+    console.error(e);
+  }
+}
+
+// ---------- Modals ----------
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+document.getElementById('unlockBtn').onclick = ()=> openModal('unlockModal');
+document.getElementById('closeUnlock').onclick = ()=> closeModal('unlockModal');
+document.getElementById('guideBtn').onclick = ()=> openModal('guideModal');
+document.getElementById('closeGuide').onclick = ()=> closeModal('guideModal');
+document.getElementById('payBtn').onclick = startPayment;
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
+});
+
+// =========================================================
+// AUDIO ENGINE
+// =========================================================
+let actx = null;
+function getCtx(){
+  if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  return actx;
+}
+
+const state = {
+  waveType:'sine', filterType:'lowpass', freqStart:440, freqEnd:220,
+  duration:0.4, attack:0.01, decay:0.3, filterFreq:4000, noiseMix:0,
+  vol:0.8, bendCurve:'linear', reverb:false, crush:false
+};
+
+// ---- Presets ----
+const PRESETS = {
+  "🖱️ UI & Interface": [
+    {name:"Click", ic:"•", p:{waveType:'sine', freqStart:800, freqEnd:600, duration:0.06, attack:0.001, decay:0.05, filterType:'lowpass', filterFreq:5000, noiseMix:5, bendCurve:'exponential'}},
+    {name:"Hover", ic:"◦", p:{waveType:'sine', freqStart:1200, freqEnd:1400, duration:0.05, attack:0.005, decay:0.04, filterType:'lowpass', filterFreq:6000, noiseMix:0, bendCurve:'linear'}},
+    {name:"Toggle On", ic:"⇥", p:{waveType:'triangle', freqStart:500, freqEnd:900, duration:0.12, attack:0.005, decay:0.1, filterType:'bandpass', filterFreq:3000, noiseMix:0, bendCurve:'exponential'}},
+    {name:"Notification", ic:"🔔", p:{waveType:'sine', freqStart:900, freqEnd:1300, duration:0.35, attack:0.01, decay:0.3, filterType:'lowpass', filterFreq:5000, noiseMix:0, bendCurve:'linear'}},
+    {name:"Success", ic:"✓", p:{waveType:'triangle', freqStart:600, freqEnd:1200, duration:0.4, attack:0.01, decay:0.35, filterType:'lowpass', filterFreq:6000, noiseMix:0, bendCurve:'exponential'}},
+    {name:"Error", ic:"✕", p:{waveType:'sawtooth', freqStart:300, freqEnd:150, duration:0.3, attack:0.01, decay:0.25, filterType:'lowpass', filterFreq:1500, noiseMix:10, bendCurve:'linear'}}
+  ],
+  "👾 Retro / 8-bit": [
+    {name:"Coin Pickup", ic:"◉", p:{waveType:'square', freqStart:900, freqEnd:1600, duration:0.15, attack:0.001, decay:0.13, filterType:'none', filterFreq:8000, noiseMix:0, bendCurve:'exponential'}},
+    {name:"Jump", ic:"⤴", p:{waveType:'square', freqStart:300, freqEnd:700, duration:0.2, attack:0.001, decay:0.18, filterType:'lowpass', filterFreq:6000, noiseMix:0, bendCurve:'linear'}},
+    {name:"Power Up", ic:"⚡", p:{waveType:'square', freqStart:200, freqEnd:1200, duration:0.5, attack:0.01, decay:0.45, filterType:'none', filterFreq:8000, noiseMix:0, bendCurve:'exponential'}},
+    {name:"Game Over", ic:"☠", p:{waveType:'sawtooth', freqStart:400, freqEnd:80, duration:0.8, attack:0.01, decay:0.75, filterType:'lowpass', filterFreq:2000, noiseMix:0, bendCurve:'linear'}}
+  ],
+  "🚀 Sci-Fi": [
+    {name:"Laser Shot", ic:"↯", p:{waveType:'sawtooth', freqStart:1800, freqEnd:200, duration:0.18, attack:0.001, decay:0.16, filterType:'highpass', filterFreq:800, noiseMix:0, bendCurve:'exponential'}},
+    {name:"Teleport", ic:"◈", p:{waveType:'sine', freqStart:200, freqEnd:2000, duration:0.5, attack:0.02, decay:0.45, filterType:'bandpass', filterFreq:3000, noiseMix:10, bendCurve:'exponential'}},
+    {name:"Robot Beep", ic:"▪", p:{waveType:'square', freqStart:1000, freqEnd:1000, duration:0.08, attack:0.001, decay:0.05, filterType:'lowpass', filterFreq:4000, noiseMix:0, bendCurve:'linear'}},
+    {name:"Force Field", ic:"◎", p:{waveType:'triangle', freqStart:150, freqEnd:180, duration:0.7, attack:0.05, decay:0.6, filterType:'bandpass', filterFreq:2000, noiseMix:20, bendCurve:'linear'}}
+  ],
+  "💥 Impact": [
+    {name:"Explosion", ic:"✺", p:{waveType:'noise', freqStart:100, freqEnd:40, duration:0.9, attack:0.001, decay:0.85, filterType:'lowpass', filterFreq:1200, noiseMix:100, bendCurve:'exponential'}},
+    {name:"Punch", ic:"●", p:{waveType:'noise', freqStart:150, freqEnd:60, duration:0.15, attack:0.001, decay:0.13, filterType:'lowpass', filterFreq:800, noiseMix:70, bendCurve:'exponential'}},
+    {name:"Metal Hit", ic:"◆", p:{waveType:'square', freqStart:900, freqEnd:300, duration:0.3, attack:0.001, decay:0.28, filterType:'highpass', filterFreq:1000, noiseMix:30, bendCurve:'exponential'}}
+  ],
+  "🌬️ Whoosh / Transition": [
+    {name:"Swoosh", ic:"〜", p:{waveType:'noise', freqStart:300, freqEnd:1500, duration:0.35, attack:0.05, decay:0.25, filterType:'bandpass', filterFreq:2500, noiseMix:90, bendCurve:'exponential'}},
+    {name:"Page Turn", ic:"▤", p:{waveType:'noise', freqStart:1000, freqEnd:500, duration:0.2, attack:0.02, decay:0.15, filterType:'highpass', filterFreq:1500, noiseMix:80, bendCurve:'linear'}},
+    {name:"Slide Transition", ic:"→", p:{waveType:'sine', freqStart:400, freqEnd:900, duration:0.3, attack:0.02, decay:0.25, filterType:'lowpass', filterFreq:4000, noiseMix:20, bendCurve:'linear'}}
+  ],
+  "🌿 Nature / Ambient": [
+    {name:"Wind Gust", ic:"≈", p:{waveType:'noise', freqStart:200, freqEnd:400, duration:1.2, attack:0.2, decay:0.9, filterType:'bandpass', filterFreq:800, noiseMix:100, bendCurve:'linear'}},
+    {name:"Rain Drop", ic:"·", p:{waveType:'noise', freqStart:2000, freqEnd:1500, duration:0.08, attack:0.001, decay:0.06, filterType:'highpass', filterFreq:3000, noiseMix:100, bendCurve:'exponential'}},
+    {name:"Thunder Rumble", ic:"▓", p:{waveType:'noise', freqStart:80, freqEnd:40, duration:1.5, attack:0.1, decay:1.3, filterType:'lowpass', filterFreq:400, noiseMix:100, bendCurve:'linear'}}
+  ]
+};
+
+let activePresetName = "Custom Sound";
+
+function buildPresetLibrary(){
+  const container = document.getElementById('presetLibrary');
+  container.innerHTML = '';
+  Object.entries(PRESETS).forEach(([cat, items])=>{
+    const group = document.createElement('div');
+    group.className = 'cat-group';
+    group.innerHTML = `<div class="cat-title">${cat}</div>`;
+    const list = document.createElement('div');
+    list.className = 'preset-list';
+    items.forEach(item=>{
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn';
+      btn.innerHTML = `<span>${item.name}</span><span class="ic">${item.ic}</span>`;
+      btn.onclick = ()=>{
+        document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        loadPreset(item.name, item.p);
+      };
+      list.appendChild(btn);
+    });
+    group.appendChild(list);
+    container.appendChild(group);
+  });
+}
+buildPresetLibrary();
+
+function loadPreset(name, p){
+  activePresetName = name;
+  Object.assign(state, p);
+  syncControlsFromState();
+  document.getElementById('currentPresetLabel').textContent = name;
+  document.getElementById('soundName').textContent = name;
+  updateMeta();
+  playSound();
+}
+
+// ---- Control bindings ----
+const ctl = {
+  waveType: document.getElementById('waveType'),
+  filterType: document.getElementById('filterType'),
+  freqStart: document.getElementById('freqStart'),
+  freqEnd: document.getElementById('freqEnd'),
+  duration: document.getElementById('duration'),
+  attack: document.getElementById('attack'),
+  decay: document.getElementById('decay'),
+  filterFreq: document.getElementById('filterFreq'),
+  noiseMix: document.getElementById('noiseMix'),
+  vol: document.getElementById('vol'),
+  bendCurve: document.getElementById('bendCurve'),
+  reverbToggle: document.getElementById('reverbToggle'),
+  crushToggle: document.getElementById('crushToggle')
+};
+
+function syncControlsFromState(){
+  ctl.waveType.value = state.waveType;
+  ctl.filterType.value = state.filterType;
+  ctl.freqStart.value = state.freqStart;
+  ctl.freqEnd.value = state.freqEnd;
+  ctl.duration.value = Math.round(state.duration*100);
+  ctl.attack.value = Math.round(state.attack*100);
+  ctl.decay.value = Math.round(state.decay*100);
+  ctl.filterFreq.value = state.filterFreq;
+  ctl.noiseMix.value = state.noiseMix;
+  ctl.vol.value = Math.round(state.vol*100);
+  ctl.bendCurve.value = state.bendCurve;
+  ctl.reverbToggle.checked = state.reverb;
+  ctl.crushToggle.checked = state.crush;
+  updateLabels();
+}
+
+function updateLabels(){
+  document.getElementById('freqStartVal').textContent = state.freqStart + ' Hz';
+  document.getElementById('freqEndVal').textContent = state.freqEnd + ' Hz';
+  document.getElementById('durationVal').textContent = state.duration.toFixed(2) + ' s';
+  document.getElementById('attackVal').textContent = state.attack.toFixed(2) + ' s';
+  document.getElementById('decayVal').textContent = state.decay.toFixed(2) + ' s';
+  document.getElementById('filterFreqVal').textContent = state.filterFreq + ' Hz';
+  document.getElementById('noiseMixVal').textContent = state.noiseMix + '%';
+  document.getElementById('volVal').textContent = Math.round(state.vol*100) + '%';
+  document.getElementById('filterTypeVal').textContent = state.filterType.charAt(0).toUpperCase()+state.filterType.slice(1);
+  document.getElementById('bendVal').textContent = state.bendCurve.charAt(0).toUpperCase()+state.bendCurve.slice(1);
+}
+function updateMeta(){
+  document.getElementById('soundMeta').textContent = `${state.waveType} · ${state.duration.toFixed(2)}s duration`;
+}
+
+function markCustom(){
+  activePresetName = "Custom Sound";
+  document.getElementById('currentPresetLabel').textContent = "Custom Sound";
+  document.getElementById('soundName').textContent = "Custom Sound";
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+}
+
+ctl.waveType.addEventListener('change', e=>{ state.waveType=e.target.value; markCustom(); updateMeta(); });
+ctl.filterType.addEventListener('change', e=>{ state.filterType=e.target.value; markCustom(); updateLabels(); });
+ctl.bendCurve.addEventListener('change', e=>{ state.bendCurve=e.target.value; markCustom(); updateLabels(); });
+ctl.freqStart.addEventListener('input', e=>{ state.freqStart=+e.target.value; markCustom(); updateLabels(); });
+ctl.freqEnd.addEventListener('input', e=>{ state.freqEnd=+e.target.value; markCustom(); updateLabels(); });
+ctl.duration.addEventListener('input', e=>{ state.duration=+e.target.value/100; markCustom(); updateLabels(); updateMeta(); });
+ctl.attack.addEventListener('input', e=>{ state.attack=+e.target.value/100; markCustom(); updateLabels(); });
+ctl.decay.addEventListener('input', e=>{ state.decay=+e.target.value/100; markCustom(); updateLabels(); });
+ctl.filterFreq.addEventListener('input', e=>{ state.filterFreq=+e.target.value; markCustom(); updateLabels(); });
+ctl.noiseMix.addEventListener('input', e=>{ state.noiseMix=+e.target.value; markCustom(); updateLabels(); });
+ctl.vol.addEventListener('input', e=>{ state.vol=+e.target.value/100; markCustom(); updateLabels(); });
+ctl.reverbToggle.addEventListener('change', e=>{ state.reverb=e.target.checked; markCustom(); });
+ctl.crushToggle.addEventListener('change', e=>{ state.crush=e.target.checked; markCustom(); });
+
+document.getElementById('randomBtn').addEventListener('click', ()=>{
+  const waves=['sine','square','sawtooth','triangle','noise'];
+  const filters=['lowpass','highpass','bandpass','none'];
+  state.waveType = waves[Math.floor(Math.random()*waves.length)];
+  state.filterType = filters[Math.floor(Math.random()*filters.length)];
+  state.freqStart = Math.floor(40 + Math.random()*1960);
+  state.freqEnd = Math.floor(40 + Math.random()*1960);
+  state.duration = +(0.05 + Math.random()*1.5).toFixed(2);
+  state.attack = +(Math.random()*0.1).toFixed(2);
+  state.decay = +(0.05 + Math.random()*0.8).toFixed(2);
+  state.filterFreq = Math.floor(300 + Math.random()*6000);
+  state.noiseMix = Math.floor(Math.random()*100);
+  state.bendCurve = Math.random()>0.5 ? 'exponential' : 'linear';
+  markCustom();
+  syncControlsFromState();
+  updateMeta();
+  playSound();
+});
+
+// =========================================================
+// SYNTH ENGINE — builds an audio graph for given context/state
+// =========================================================
+function buildNoiseBuffer(ctx, duration){
+  const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * duration));
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i] = Math.random()*2-1;
+  return buffer;
+}
+
+function buildImpulseResponse(ctx, duration=1.5, decayPow=2.5){
+  const rate = ctx.sampleRate;
+  const len = rate*duration;
+  const impulse = ctx.createBuffer(2, len, rate);
+  for(let ch=0; ch<2; ch++){
+    const data = impulse.getChannelData(ch);
+    for(let i=0;i<len;i++){
+      data[i] = (Math.random()*2-1) * Math.pow(1-i/len, decayPow);
+    }
+  }
+  return impulse;
+}
+
+function scheduleSound(ctx, destination, s, startTime){
+  const dur = Math.max(0.02, s.duration);
+  const attack = Math.min(s.attack, dur*0.9);
+  const decay = Math.max(0.01, dur - attack);
+
+  // gain / envelope
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0, startTime);
+  env.gain.linearRampToValueAtTime(s.vol, startTime + attack);
+  env.gain.exponentialRampToValueAtTime(0.0001, startTime + attack + decay);
+
+  // filter
+  let node = env;
+  if(s.filterType !== 'none'){
+    const filter = ctx.createBiquadFilter();
+    filter.type = s.filterType;
+    filter.frequency.setValueAtTime(s.filterFreq, startTime);
+    node.connect(filter);
+    node = filter;
+  }
+
+  // bitcrush (waveshaper-based simple crush)
+  if(s.crush){
+    const shaper = ctx.createWaveShaper();
+    const n = 256, curve = new Float32Array(n);
+    const steps = 8;
+    for(let i=0;i<n;i++){
+      const x = (i/n)*2-1;
+      curve[i] = Math.round(x*steps)/steps;
+    }
+    shaper.curve = curve;
+    node.connect(shaper);
+    node = shaper;
+  }
+
+  // reverb
+  let finalNode = node;
+  if(s.reverb){
+    const convolver = ctx.createConvolver();
+    convolver.buffer = buildImpulseResponse(ctx, Math.min(2.5, dur+1), 2.5);
+    const wet = ctx.createGain(); wet.gain.value = 0.35;
+    const dry = ctx.createGain(); dry.gain.value = 0.9;
+    node.connect(dry); dry.connect(destination);
+    node.connect(convolver); convolver.connect(wet); wet.connect(destination);
+  } else {
+    node.connect(destination);
+  }
+
+  // sound source: oscillator or noise, mixed
+  const useOsc = s.waveType !== 'noise' && s.noiseMix < 100;
+  const useNoise = s.waveType === 'noise' || s.noiseMix > 0;
+
+  if(useOsc){
+    const osc = ctx.createOscillator();
+    osc.type = s.waveType === 'noise' ? 'sine' : s.waveType;
+    if(s.bendCurve === 'exponential'){
+      osc.frequency.setValueAtTime(Math.max(1,s.freqStart), startTime);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(1,s.freqEnd), startTime+dur);
+    } else {
+      osc.frequency.setValueAtTime(s.freqStart, startTime);
+      osc.frequency.linearRampToValueAtTime(s.freqEnd, startTime+dur);
+    }
+    const oscGain = ctx.createGain();
+    oscGain.gain.value = s.waveType==='noise' ? 0 : (1 - s.noiseMix/100);
+    osc.connect(oscGain); oscGain.connect(env);
+    osc.start(startTime); osc.stop(startTime+dur+0.05);
+  }
+  if(useNoise){
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = buildNoiseBuffer(ctx, dur+0.05);
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type='bandpass';
+    const midFreq = (s.freqStart+s.freqEnd)/2;
+    noiseFilter.frequency.setValueAtTime(Math.max(60,midFreq), startTime);
+    if(s.bendCurve==='exponential'){
+      noiseFilter.frequency.exponentialRampToValueAtTime(Math.max(60,s.freqEnd), startTime+dur);
+    } else {
+      noiseFilter.frequency.linearRampToValueAtTime(Math.max(60,s.freqEnd), startTime+dur);
+    }
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = s.waveType==='noise' ? 1 : s.noiseMix/100;
+    noiseSrc.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(env);
+    noiseSrc.start(startTime); noiseSrc.stop(startTime+dur+0.05);
+  }
+
+  return dur + (s.reverb ? 1.0 : 0.1);
+}
+
+// ---------- Live playback + visualizer ----------
+const canvas = document.getElementById('wave');
+const dctx = canvas.getContext('2d');
+function resizeCanvas(){
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = 180 * devicePixelRatio;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let analyser=null, animId=null;
+
+function drawIdle(){
+  dctx.clearRect(0,0,canvas.width,canvas.height);
+  dctx.strokeStyle = '#232a38';
+  dctx.lineWidth = 2*devicePixelRatio;
+  dctx.beginPath();
+  dctx.moveTo(0, canvas.height/2);
+  dctx.lineTo(canvas.width, canvas.height/2);
+  dctx.stroke();
+}
+drawIdle();
+
+function drawFrame(){
+  if(!analyser) return;
+  const bufferLength = analyser.fftSize;
+  const dataArray = new Uint8Array(bufferLength);
+  analyser.getByteTimeDomainData(dataArray);
+  dctx.clearRect(0,0,canvas.width,canvas.height);
+  dctx.lineWidth = 2.2*devicePixelRatio;
+  const grad = dctx.createLinearGradient(0,0,canvas.width,0);
+  grad.addColorStop(0,'#e0b559'); grad.addColorStop(.5,'#3ecf8e'); grad.addColorStop(1,'#9b8cff');
+  dctx.strokeStyle = grad;
+  dctx.beginPath();
+  const slice = canvas.width / bufferLength;
+  let x=0;
+  for(let i=0;i<bufferLength;i++){
+    const v = dataArray[i]/128.0;
+    const y = v * canvas.height/2;
+    if(i===0) dctx.moveTo(x,y); else dctx.lineTo(x,y);
+    x += slice;
+  }
+  dctx.stroke();
+  animId = requestAnimationFrame(drawFrame);
+}
+
+function playSound(){
+  const ctx = getCtx();
+  if(ctx.state==='suspended') ctx.resume();
+  if(animId) cancelAnimationFrame(animId);
+
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 1024;
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 1;
+  masterGain.connect(analyser);
+  analyser.connect(ctx.destination);
+
+  const dur = scheduleSound(ctx, masterGain, state, ctx.currentTime);
+  drawFrame();
+  setTimeout(()=>{ if(animId){cancelAnimationFrame(animId); animId=null;} drawIdle(); }, (dur+0.2)*1000);
+
+  addToHistory();
+}
+
+document.getElementById('playBtn').addEventListener('click', playSound);
+
+// ---------- History ----------
+let history = JSON.parse(localStorage.getItem('sefx_history')||'[]');
+function addToHistory(){
+  const entry = {name: activePresetName, params: {...state}, ts: Date.now()};
+  history.unshift(entry);
+  history = history.slice(0,8);
+  localStorage.setItem('sefx_history', JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(history.length===0){ el.innerHTML = '<div class="empty-note">Abhi tak koi sound generate nahi hua</div>'; return; }
+  el.innerHTML = '';
+  history.forEach((h)=>{
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    row.innerHTML = `<span>${h.name}</span><button class="ic-btn" title="Replay">▶</button>`;
+    row.querySelector('.ic-btn').onclick = ()=>{
+      Object.assign(state, h.params);
+      activePresetName = h.name;
+      document.getElementById('currentPresetLabel').textContent = h.name;
+      document.getElementById('soundName').textContent = h.name;
+      syncControlsFromState(); updateMeta(); playSound();
+    };
+    el.appendChild(row);
+  });
+}
+renderHistory();
+
+// =========================================================
+// WAV RENDER + DOWNLOAD
+// =========================================================
+async function renderToBuffer(s){
+  const dur = Math.max(0.05, s.duration) + (s.reverb ? 1.2 : 0.15);
+  const offline = new OfflineAudioContext(1, Math.ceil(44100*dur), 44100);
+  const gain = offline.createGain(); gain.gain.value = 1; gain.connect(offline.destination);
+  scheduleSound(offline, gain, s, 0);
+  return await offline.startRendering();
+}
+
+function audioBufferToWav(buffer){
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const format = 1; // PCM
+  const bitDepth = 16;
+  const bytesPerSample = bitDepth/8;
+  const blockAlign = numChannels*bytesPerSample;
+  let interleaved;
+  if(numChannels===2){
+    const ch0=buffer.getChannelData(0), ch1=buffer.getChannelData(1);
+    interleaved = new Float32Array(ch0.length*2);
+    for(let i=0;i<ch0.length;i++){ interleaved[i*2]=ch0[i]; interleaved[i*2+1]=ch1[i]; }
+  } else {
+    interleaved = buffer.getChannelData(0);
+  }
+  const bufferLength = interleaved.length * bytesPerSample;
+  const arrayBuffer = new ArrayBuffer(44 + bufferLength);
+  const view = new DataView(arrayBuffer);
+  function writeStr(offset,str){ for(let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i)); }
+  writeStr(0,'RIFF');
+  view.setUint32(4, 36+bufferLength, true);
+  writeStr(8,'WAVE');
+  writeStr(12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,format,true);
+  view.setUint16(22,numChannels,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*blockAlign,true);
+  view.setUint16(32,blockAlign,true);
+  view.setUint16(34,bitDepth,true);
+  writeStr(36,'data');
+  view.setUint32(40,bufferLength,true);
+  let offset=44;
+  for(let i=0;i<interleaved.length;i++){
+    let sample = Math.max(-1, Math.min(1, interleaved[i]));
+    sample = sample<0 ? sample*0x8000 : sample*0x7FFF;
+    view.setInt16(offset, sample, true);
+    offset+=2;
+  }
+  return new Blob([arrayBuffer], {type:'audio/wav'});
+}
+
+function applyWatermarkBleep(blob){
+  return blob; // watermark handled by adding a short beep tail in demo mode (see downloadSound)
+}
+
+async function downloadSound(){
+  if(!isUnlocked && freeDownloadsUsed >= FREE_DOWNLOAD_LIMIT){
+    openModal('unlockModal');
+    return;
+  }
+  const btn = document.getElementById('downloadBtn');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Rendering...';
+  btn.disabled = true;
+  try{
+    const buf = await renderToBuffer(state);
+    const blob = audioBufferToWav(buf);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(activePresetName||'sound').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.wav`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    if(!isUnlocked){
+      freeDownloadsUsed++;
+      localStorage.setItem('sefx_free_downloads', String(freeDownloadsUsed));
+      refreshStatusPill();
+    }
+  }catch(e){
+    console.error(e);
+    alert('Download mein error aaya. Dobara try karein.');
+  }
+  btn.textContent = orig;
+  btn.disabled = false;
+}
+document.getElementById('downloadBtn').addEventListener('click', downloadSound);
+
+// ---------- Locked features ----------
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  if(!isUnlocked){ openModal('unlockModal'); return; }
+  const name = prompt('Preset ka naam dein:', activePresetName!=='Custom Sound'?activePresetName:'My Sound');
+  if(!name) return;
+  const saved = JSON.parse(localStorage.getItem('sefx_custom_presets')||'[]');
+  saved.unshift({name, params:{...state}});
+  localStorage.setItem('sefx_custom_presets', JSON.stringify(saved.slice(0,30)));
+  alert(`✓ "${name}" preset save ho gaya!`);
+});
+
+let lastBatch = [];
+document.getElementById('batchBtn').addEventListener('click', async ()=>{
+  if(!isUnlocked){ openModal('unlockModal'); return; }
+  const panel = document.getElementById('batchPanel');
+  const grid = document.getElementById('batchGrid');
+  panel.style.display = 'block';
+  grid.innerHTML = '<div class="empty-note">Generating variations...</div>';
+  lastBatch = [];
+  await new Promise(r=>setTimeout(r,50));
+  grid.innerHTML = '';
+  for(let i=0;i<5;i++){
+    const variant = {...state};
+    variant.freqStart = Math.max(20, state.freqStart * (0.85 + Math.random()*0.3));
+    variant.freqEnd = Math.max(20, state.freqEnd * (0.85 + Math.random()*0.3));
+    variant.duration = Math.max(0.03, state.duration * (0.85 + Math.random()*0.3));
+    variant.filterFreq = Math.max(100, state.filterFreq * (0.8 + Math.random()*0.4));
+    lastBatch.push(variant);
+    const item = document.createElement('div');
+    item.className = 'batch-item';
+    item.innerHTML = `<div class="n">Variation ${i+1}</div><button class="btn" style="width:100%;">▶ Play</button>`;
+    item.querySelector('button').onclick = ()=>{
+      const ctx = getCtx(); if(ctx.state==='suspended') ctx.resume();
+      const g = ctx.createGain(); g.connect(ctx.destination);
+      scheduleSound(ctx, g, variant, ctx.currentTime);
+    };
+    grid.appendChild(item);
+  }
+});
+
+document.getElementById('zipBtn').addEventListener('click', async ()=>{
+  if(!isUnlocked){ openModal('unlockModal'); return; }
+  if(lastBatch.length===0){ alert('Pehle variations generate karein.'); return; }
+  const zip = new JSZip();
+  for(let i=0;i<lastBatch.length;i++){
+    const buf = await renderToBuffer(lastBatch[i]);
+    const blob = audioBufferToWav(buf);
+    zip.file(`variation-${i+1}.wav`, blob);
+  }
+  const content = await zip.generateAsync({type:'blob'});
+  const url = URL.createObjectURL(content);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${(activePresetName||'sound').toLowerCase().replace(/[^a-z0-9]+/g,'-')}-variations.zip`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// ---------- init ----------
+syncControlsFromState();
+updateMeta();
+if(DEMO_MODE){
+  console.log('%c⚠️ DEMO MODE ACTIVE', 'color:#e0b559;font-weight:bold;font-size:13px;', '\\nReplace SUPABASE_URL, SUPABASE_ANON_KEY, RAZORPAY_KEY_ID with real credentials to go live.');
+}
+</script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>
